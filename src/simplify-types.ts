@@ -2,7 +2,12 @@ import { unindent } from "./utils/unindent";
 import { compileTypes } from "./compile-types";
 import { logger } from "./utils/logger";
 
-export function simplifyTypes(config: { sourceFiles: string[], keepPromises?: boolean, typeMask?: string, beautify?: boolean }) {
+export function simplifyTypes(config: {
+  sourceFiles: string[];
+  keepPromises?: boolean;
+  typeMask?: string;
+  beautify?: boolean;
+}) {
   return compileTypes({
     include: config.sourceFiles,
     typeMask: config.typeMask,
@@ -36,29 +41,33 @@ export function simplifyTypes(config: { sourceFiles: string[], keepPromises?: bo
 
       for (let i = 0; i < sourceFiles.length; i++) {
         const sourceFile = sourceFiles[i];
-        const sourceTypes = sourceFile.getTypeAliases().filter((t: any) => t.isExported());
+        const sourceTypes = sourceFile.getTypeAliases().filter((t) => t.isExported());
 
-        logger.info(`Source file exports ${sourceTypes.length} types: ${sourceTypes.map((t: any) => t.getName()).join(", ")}`);
+        logger.info(
+          `Source file exports ${sourceTypes.length} types: ${sourceTypes.map((t) => t.getName()).join(", ")}`,
+        );
 
-        code.push(unindent(`
+        code.push(
+          unindent(`
             import * as SOURCES${i} from './${config.sourceFiles[i]}';
 
             ${sourceTypes
-            .map((type: any) => {
-              const name = type.getName();
-              return unindent(`
+              .map((type) => {
+                const name = type.getName();
+                return unindent(`
                   export type ${name} = SimplifyDeep<SOURCES${i}.${name}>;
                 `);
-            })
-            .join("")}
-          `));
+              })
+              .join("")}
+          `),
+        );
       }
 
       return code.join("\n");
     },
     outputOptions: {
       header: unindent(`
-        /* Types generated from '${config.sourceFiles.join(' | ')}' */
+        /* Types generated from '${config.sourceFiles.join(" | ")}' */
       `),
       generateUniqueSymbols: true,
     },

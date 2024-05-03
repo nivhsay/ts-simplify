@@ -67,7 +67,12 @@ yargs(hideBin(process.argv))
         }),
     ({ promises, beautify, mask, _: [source, output] }) => {
       // Generate the simplified types:
-      const outputText = simplifyTypes({ sourceFiles: source.split('|'), keepPromises: Boolean(promises), typeMask: mask, beautify: Boolean(beautify) });
+      const outputText = simplifyTypes({
+        sourceFiles: source.split("|"),
+        keepPromises: Boolean(promises),
+        typeMask: mask,
+        beautify: Boolean(beautify),
+      });
       // Output the results:
       if (output) {
         fs.writeFileSync(output, outputText);
@@ -75,7 +80,7 @@ yargs(hideBin(process.argv))
       } else {
         console.log(outputText);
       }
-    }
+    },
   )
   .help()
   .parseSync();

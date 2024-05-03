@@ -23,7 +23,7 @@ describe("compile-types", () => {
       const result = compileTypesTest(
         unindent(`
           export type FooSimple = SimplifyDeep<Foo>;
-        `)
+        `),
       );
       expect([result]).toMatchInlineSnapshot(`
         [
@@ -35,7 +35,7 @@ describe("compile-types", () => {
       const result = compileTypesTest(
         unindent(`
           export type FooSimple = SimplifyDeep<RequiredDeep<Foo>>;
-        `)
+        `),
       );
       expect([result]).toMatchInlineSnapshot(`
         [
@@ -47,7 +47,7 @@ describe("compile-types", () => {
       const result = compileTypesTest(
         unindent(`
           export type FooSimple = SimplifyDeep<PartialDeep<Foo>>;
-        `)
+        `),
       );
       expect([result]).toMatchInlineSnapshot(`
         [

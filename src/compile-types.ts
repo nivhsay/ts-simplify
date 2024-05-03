@@ -74,8 +74,8 @@ export function compileTypes(config: CompileConfig) {
       .getText(
         undefined,
         TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
-        TypeFormatFlags.NoTruncation |
-        TypeFormatFlags.UseSingleQuotesForStringLiteralType
+          TypeFormatFlags.NoTruncation |
+          TypeFormatFlags.UseSingleQuotesForStringLiteralType,
       );
 
     // Add this expanded type to the output:
@@ -101,7 +101,7 @@ export function compileTypes(config: CompileConfig) {
     uniqueSymbols = [...uniqueSymbolNames].map((symName) =>
       unindent(`
         export declare const ${symName}: unique symbol;
-      `).trim()
+      `).trim(),
     );
   }
 
@@ -110,7 +110,6 @@ export function compileTypes(config: CompileConfig) {
     ${uniqueSymbols.join("\n")}
     ${compiledTypes}
   `).trim();
-
 
   if (config.beautify) {
     output = synchronizedPrettier.format(output, { parser: "typescript" }).replace(/export type/g, "\nexport type");
