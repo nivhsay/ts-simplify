@@ -4,7 +4,7 @@ import { simplifyTypes } from "./simplify-types";
 describe("simplify-types", () => {
   describe("./src/fixtures/test-file.ts", () => {
     it("renders the entire compiled file correctly", async () => {
-      const result = simplifyTypes({ sourceFile: "./src/fixtures/test-file.ts" });
+      const result = simplifyTypes({ sourceFiles: ["./src/fixtures/test-file.ts"] });
       expect(result).toMatchInlineSnapshot(`
         "/* Types generated from './src/fixtures/test-file.ts' */
           

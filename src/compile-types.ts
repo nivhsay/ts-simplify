@@ -1,10 +1,13 @@
 import { Project, SourceFile, TypeFormatFlags } from "ts-morph";
 import { logger } from "./utils/logger";
 import { unindent } from "./utils/unindent";
+import synchronizedPrettier from "@prettier/sync";
 
 export type CompileConfig = {
   tsConfigFilePath?: string;
   include?: string[];
+  typeMask?: string;
+  beautify?: boolean;
   sourceCode?: string | ((details: { project: Project; files: SourceFile[] }) => string);
   sourceFile?: string;
   outputOptions?: {
@@ -41,7 +44,24 @@ export function compileTypes(config: CompileConfig) {
   } else {
     throw new Error(`You must supply either 'sourceCode' or 'sourceFile'`);
   }
-  const sourceTypes = sourceFile.getTypeAliases().filter((type) => type.isExported());
+
+  const sourceTypes = sourceFile.getTypeAliases().filter((type) => {
+    if (type.isExported()) {
+      if (!config.typeMask) {
+        return true;
+      }
+
+      const typeName = type.getName();
+
+      if (config.typeMask.startsWith("*")) {
+        return typeName.endsWith(config.typeMask.slice(1));
+      } else if (config.typeMask.endsWith("*")) {
+        return typeName.startsWith(config.typeMask.slice(0, -1));
+      } else {
+        return typeName === config.typeMask;
+      }
+    }
+  });
 
   // Generate the output:
   const outputFile = project.createSourceFile("./__VIRTUAL__OUTPUT__.ts");
@@ -54,8 +74,8 @@ export function compileTypes(config: CompileConfig) {
       .getText(
         undefined,
         TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
-          TypeFormatFlags.NoTruncation |
-          TypeFormatFlags.UseSingleQuotesForStringLiteralType
+        TypeFormatFlags.NoTruncation |
+        TypeFormatFlags.UseSingleQuotesForStringLiteralType
       );
 
     // Add this expanded type to the output:
@@ -85,9 +105,16 @@ export function compileTypes(config: CompileConfig) {
     );
   }
 
-  return unindent(`
+  let output = unindent(`
     ${config.outputOptions?.header ?? ""}
     ${uniqueSymbols.join("\n")}
     ${compiledTypes}
   `).trim();
+
+
+  if (config.beautify) {
+    output = synchronizedPrettier.format(output, { parser: "typescript" }).replace(/export type/g, "\nexport type");
+  }
+
+  return output;
 }
